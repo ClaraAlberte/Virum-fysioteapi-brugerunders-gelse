@@ -28,8 +28,20 @@ const alleSvar = {{ svar|tojson }};
 const filtreDiv = document.getElementById("filtre");
 const filterValg = {};
 
+// 1. Byg filtre dynamisk baseret på svartype
 skema.spoergsmaal.forEach((sp) => {
+  let muligheder = [];
+
   if (sp.type === "valg") {
+    muligheder = sp.valg;
+  } else if (sp.type === "nummer" || sp.type === "likert") {
+    // Find alle unikke tal, der er svaret, og sortér dem
+    let tal = alleSvar.map(d => d[sp.tekst]).filter(v => v !== undefined && v !== "");
+    muligheder = [...new Set(tal)].sort((a, b) => Number(a) - Number(b));
+  }
+
+  // Hvis der er muligheder at filtrere efter, lav en dropdown
+  if (muligheder.length > 0) {
     const div = document.createElement("div");
     div.style.flex = "1";
     div.style.minWidth = "200px";
@@ -40,7 +52,7 @@ skema.spoergsmaal.forEach((sp) => {
 
     const sel = document.createElement("select");
     sel.innerHTML = `<option value="">Alle</option>` +
-      sp.valg.map(v => `<option>${v}</option>`).join("");
+      muligheder.map(v => `<option value="${v}">${v}</option>`).join("");
     sel.addEventListener("change", opdater);
 
     div.appendChild(label);
@@ -50,10 +62,13 @@ skema.spoergsmaal.forEach((sp) => {
   }
 });
 
+// 2. Opdater statistikken baseret på valgte filtre
 function opdater() {
   let data = alleSvar.slice();
+  
+  // Filtrer data
   for (const [spoergsmaal, sel] of Object.entries(filterValg)) {
-    if (sel.value) data = data.filter(d => d[spoergsmaal] === sel.value);
+    if (sel.value) data = data.filter(d => String(d[spoergsmaal]) === sel.value);
   }
 
   document.getElementById("antal").textContent = data.length;
@@ -65,6 +80,7 @@ function opdater() {
     return;
   }
 
+  // 3. Vis statistik pr. spørgsmål
   skema.spoergsmaal.forEach(sp => {
     if (sp.type === "valg") {
       const fordeling = {};
