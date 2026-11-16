@@ -28,8 +28,8 @@
 
         <label>Bredde på print</label>
         <select name="bredde_{{ loop.index0 }}">
-          <option value="fuld" {% if sp.bredde != 'halv' %}selected{% endif %}>Fuld bredde (100%)</option>
           <option value="halv" {% if sp.bredde == 'halv' %}selected{% endif %}>Halv bredde (50% - kan stå ved siden af et andet)</option>
+          <option value="fuld" {% if sp.bredde != 'halv' %}selected{% endif %}>Fuld bredde (100%)</option>
         </select>
 
         <label>Svartype</label>
